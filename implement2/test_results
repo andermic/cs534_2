@@ -1,0 +1,353 @@
+Without Numbers:
+    Training vs. Training
+        rec.sport.baseball: 92.44%
+        comp.windows.x: 89.30%
+        misc.forsale: 99.69%
+        sci.electronics: 98.47%
+
+    Training vs. Testing
+        rec.sport.baseball - 85.54%
+        comp.windows.x - 79.75%
+        misc.forsale - 96.30%
+        sci.electronics - 86.54%
+
+    Testing vs. Testing
+        rec.sport.baseball - 90.96%
+        comp.windows.x - 86.81%
+        misc.forsale - 100.00%
+        sci.electronics - 87.16%
+
+
+With Numbers:
+    Training vs. Training
+        rec.sport.baseball - 93.05%
+        comp.windows.x - 91.13%
+        misc.forsale - 99.69%
+        sci.electronics - 99.69%
+
+    Training vs. Testing
+        rec.sport.baseball - 87.05%
+        comp.windows.x - 82.82%
+        misc.forsale - 95.68%
+        sci.electronics - 93.88%
+
+    Testing vs. Testing
+        rec.sport.baseball - 91.57%
+        comp.windows.x - 90.49%
+        misc.forsale - 100.00%
+        sci.electronics - 90.83%
+
+Size of training.txt & testing.txt ~ 50M
+
+
+########################################################################
+TEST RESULTS FOR ADVANCED1 BY ITSELF. THROW WORDS OUT OF VOCABULARY THAT
+OCCUR LESS THAN K TIMES
+########################################################################
+
+Training vs. Training
+    K = 2
+        rec.sport.baseball - 91.24%
+        comp.windows.x - 91.74%
+        misc.forsale - 99.69%
+        sci.electronics - 98.78%
+
+    K = 5
+        rec.sport.baseball - 88.52%
+        comp.windows.x - 90.21%
+        misc.forsale - 98.46%
+        sci.electronics - 97.25%
+
+    K = 10
+        rec.sport.baseball - 87.61%
+        comp.windows.x - 89.91%
+        misc.forsale - 98.15%
+        sci.electronics - 95.41%
+
+    K = 50
+        rec.sport.baseball - 83.99%
+        comp.windows.x - 86.54%
+        misc.forsale - 93.52%
+        sci.electronics - 93.88%
+
+    K = 100
+        rec.sport.baseball - 77.04%
+        comp.windows.x - 82.57%
+        misc.forsale - 85.19%
+        sci.electronics - 89.60%
+
+    K = 500
+        rec.sport.baseball - 27.49%
+        comp.windows.x - 37.92%
+        misc.forsale - 61.73%
+        sci.electronics - 62.69%
+
+    K = 1000
+        rec.sport.baseball - 0.00%
+        comp.windows.x - 13.76%
+        misc.forsale - 35.19%
+        sci.electronics - 69.42%
+
+Training vs. Testing
+    K = 2
+        Size of files ~ 35M
+        rec.sport.baseball - 86.45%
+        comp.windows.x - 83.44%
+        misc.forsale - 95.37%
+        sci.electronics - 92.35%
+
+    K = 5
+        Size of files ~ 15M
+        rec.sport.baseball - 86.45%
+        comp.windows.x - 82.52%
+        misc.forsale - 93.21%
+        sci.electronics - 92.66%
+
+    K = 10
+        Size of files ~ 7M
+        rec.sport.baseball - 85.54%
+        comp.windows.x - 83.44%
+        misc.forsale - 92.90%
+        sci.electronics - 93.27%
+
+    K = 50
+        Size of files ~ 1M
+        rec.sport.baseball - 87.65%
+        comp.windows.x - 84.05%
+        misc.forsale - 88.58%
+        sci.electronics - 91.44%
+
+    K = 100
+        Size of files ~ 1/2 M
+        rec.sport.baseball - 79.82%
+        comp.windows.x - 78.53%
+        misc.forsale - 84.26%
+        sci.electronics - 83.18%
+
+    K = 500
+        Size of files ~ 50k
+        rec.sport.baseball - 28.92%
+        comp.windows.x - 10.43%
+        misc.forsale - 53.70%
+        sci.electronics - 59.63%
+
+    K = 1000
+        Size of files ~ 25k 
+        rec.sport.baseball - 0.00%
+        comp.windows.x - 0.00%
+        misc.forsale - 32.72%
+        sci.electronics - 73.39%
+
+
+########################################################################
+TEST RESULTS FOR ADVANCED2 BY ITSELF. ADD THE K MOST FREQUENTLY
+OCCURRING BIGRAMS AND TRIGRAMS TO THE VOCABULARY
+########################################################################
+
+Training vs. Training
+    K = 25
+        rec.sport.baseball - 93.05%
+        comp.windows.x - 91.13%
+        misc.forsale - 99.69%
+        sci.electronics - 99.69%
+
+    K = 50
+        rec.sport.baseball - 93.05%
+        comp.windows.x - 90.83%
+        misc.forsale - 99.69%
+        sci.electronics - 99.69%
+
+    K = 100
+        rec.sport.baseball - 93.05%
+        comp.windows.x - 90.21%
+        misc.forsale - 99.38%
+        sci.electronics - 99.69%
+
+    K = 250
+        rec.sport.baseball - 92.75%
+        comp.windows.x - 89.91%
+        misc.forsale - 99.07%
+        sci.electronics - 99.69%
+
+    K = 1000
+        rec.sport.baseball - 91.54%
+        comp.windows.x - 89.91%
+        misc.forsale - 99.07%
+        sci.electronics - 99.69%
+
+Training vs. Testing
+    K = 25
+        rec.sport.baseball - 86.75%
+        comp.windows.x - 81.90%
+        misc.forsale - 95.68%
+        sci.electronics - 94.19%
+
+    K = 50
+        rec.sport.baseball - 87.05%
+        comp.windows.x - 82.21%
+        misc.forsale - 95.68%
+        sci.electronics - 94.19%
+
+    K = 100
+        rec.sport.baseball - 87.35%
+        comp.windows.x - 82.21%
+        misc.forsale - 95.99%
+        sci.electronics - 94.19%
+
+    K = 250
+        rec.sport.baseball - 87.05%
+        comp.windows.x - 82.82%
+        misc.forsale - 95.68%
+        sci.electronics - 93.88%
+
+    K = 1000
+        rec.sport.baseball - 87.65%
+        comp.windows.x - 82.52%
+        misc.forsale - 95.99%
+        sci.electronics - 93.58%
+
+
+########################################################################
+TEST RESULTS FOR ADVANCED3 BY ITSELF. ONLY KEEP THE K MOST USEFUL WORDS
+IN THE VOCABULARY, USING MUTUAL INFORMATION
+########################################################################
+
+Training vs. Training
+    K = 50
+        rec.sport.baseball - 77.64%
+        comp.windows.x - 77.37%
+        misc.forsale - 73.77%
+        sci.electronics - 85.02%
+
+    K = 100
+        rec.sport.baseball - 76.44%
+        comp.windows.x - 77.98%
+        misc.forsale - 80.25%
+        sci.electronics - 91.44%
+
+    K = 150
+        rec.sport.baseball - 79.76%
+        comp.windows.x - 79.20%
+        misc.forsale - 81.48%
+        sci.electronics - 93.88%
+
+    K = 200
+        rec.sport.baseball - 82.78%
+        comp.windows.x - 80.73%
+        misc.forsale - 83.33%
+        sci.electronics - 95.41%
+
+    K = 300
+        rec.sport.baseball - 82.78%
+        comp.windows.x - 83.18%
+        misc.forsale - 87.04%
+        sci.electronics - 95.11%
+
+    K = 400
+        rec.sport.baseball - 81.87%
+        comp.windows.x - 85.02%
+        misc.forsale - 89.51%
+        sci.electronics - 95.41%
+
+    K = 500
+        rec.sport.baseball - 83.38%
+        comp.windows.x - 84.71%
+        misc.forsale - 89.51%
+        sci.electronics - 96.02%
+
+    K = 1000
+        rec.sport.baseball - 84.29%
+        comp.windows.x - 88.07%
+        misc.forsale - 95.37%
+        sci.electronics - 95.11%
+
+Training vs. Testing
+    K = 50
+        rec.sport.baseball - 80.72%
+        comp.windows.x - 78.22%
+        misc.forsale - 71.30%
+        sci.electronics - 86.24%
+
+    K = 100
+        rec.sport.baseball - 82.83%
+        comp.windows.x - 80.06%
+        misc.forsale - 82.10%
+        sci.electronics - 85.32%
+
+    K = 150
+        rec.sport.baseball - 81.02%
+        comp.windows.x - 80.06%
+        misc.forsale - 82.10%
+        sci.electronics - 88.38%
+
+    K = 200
+        rec.sport.baseball - 82.53%
+        comp.windows.x - 81.60%
+        misc.forsale - 83.95%
+        sci.electronics - 89.60%
+
+    K = 300
+        rec.sport.baseball - 86.75%
+        comp.windows.x - 82.52%
+        misc.forsale - 86.11%
+        sci.electronics - 89.91%
+
+    K = 400
+        rec.sport.baseball - 86.75%
+        comp.windows.x - 85.58%
+        misc.forsale - 86.11%
+        sci.electronics - 92.05%
+
+    K = 500
+        rec.sport.baseball - 86.45%
+        comp.windows.x - 86.81%
+        misc.forsale - 87.65%
+        sci.electronics - 92.35%
+
+    K = 1000
+        rec.sport.baseball - 85.84%
+        comp.windows.x - 86.20%
+        misc.forsale - 91.05%
+        sci.electronics - 93.88%
+
+
+########################################################################
+TEST RESULTS FOR ALL THREE AUGMENTATIONS COMBINED
+########################################################################
+
+    Training vs. Training
+        Mutual information K=1000, then Infrequent feature removal K=7, then Ngrams K=500
+        Size of final vocab list: 1500
+            rec.sport.baseball - 82.78%
+            comp.windows.x - 85.32%
+            misc.forsale - 95.06%
+            sci.electronics - 96.64%
+
+    Training vs. Testing
+        Mutual information K=1000, then Infrequent feature removal K=7, then Ngrams K=50
+        Size of final vocab list: 1050
+            rec.sport.baseball - 85.84%
+            comp.windows.x - 85.28%
+            misc.forsale - 89.81%
+            sci.electronics - 94.19%
+
+        Mutual information K=1000, then Infrequent feature removal K=7, then Ngrams K=500
+        Size of final vocab list: 1500
+            rec.sport.baseball - 86.14%
+            comp.windows.x - 85.28%
+            misc.forsale - 91.05%
+            sci.electronics - 92.66%
+
+        Mutual information K=1000, then Infrequent feature removal K=7, then Ngrams K=1000
+        Size of final vocab list: 2000
+            rec.sport.baseball - 84.94%
+            comp.windows.x - 86.20%
+            misc.forsale - 91.36%
+            sci.electronics - 92.66%
+
+        Mutual information K=1000, then Ngrams K=1000, then Infrequent feature removal K=15
+        Size of final vocab list: ~ 1300
+            rec.sport.baseball - 85.24%
+            comp.windows.x - 84.97%
+            misc.forsale - 90.43%
+            sci.electronics - 92.66%
