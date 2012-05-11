@@ -1,7 +1,8 @@
 #! /usr/bin/python
 
-from math import log
+from math import log, floor
 
+# 'train' will classify the training data, 'test' will classify the testing data
 TEST_PREFIX = 'test'
 
 # Get words
@@ -31,12 +32,13 @@ tr_label_file.close()
 #  from each class. Count the total number of words in each class.
 train_file = open('train.data','r')
 
-word_presences = [[0] * len(words)] * len(class_names)
-docs_per_class = [None] + ([0] * len(class_names))
-word_nums = [None] + ([[None] + ([0] * len(words))] * len(class_names))
-words_per_class = [None] + ([0] * len(class_names))
+word_presences = [[0 for i in range(len(words))] for j in range(len(class_names))]
+docs_per_class = [0 for i in range(len(class_names))]
+word_nums = [[0 for i in range(len(words))] for j in range(len(class_names))]
+words_per_class = [0 for i in range(len(class_names))]
 
 progress = 0
+last_doc_id = -1
 print '\nProcessing training data'
 
 while True:
@@ -53,7 +55,9 @@ while True:
 
     # Update counts
     word_presences[label_id][word_id] += 1
-    docs_per_class[label_id] += 1
+    if last_doc_id != doc_id:
+        docs_per_class[label_id] += 1
+	last_doc_id = doc_id
     word_nums[label_id][word_id] += count
     words_per_class[label_id] += count
 
@@ -63,8 +67,8 @@ train_file.close()
 
 
 # Estimate p(word|class) for both the Bernouilli and Multinomial models.
-bern_probs = [[0] * len(words)] * len(class_names)
-mult_probs = [[0] * len(words)] * len(class_names)
+bern_probs = [[0 for i in range(len(words))] for j in range(len(class_names))]
+mult_probs = [[0 for i in range(len(words))] for j in range(len(class_names))]
 
 print 'Estimating p(word|class) probabilities'
 for label_id in range(1, len(class_names)):
@@ -100,8 +104,8 @@ while True:
     # If the read line is the start of a new document, initialize probability
     #  lists and a word list for the new document.
     if doc_id == len(doc_bern_probs):
-        doc_bern_probs.append([0] * len(class_names))
-        doc_mult_probs.append([0] * len(class_names))
+        doc_bern_probs.append([0 for i in range(len(class_names))])
+        doc_mult_probs.append([0 for i in range(len(class_names))])
         #doc_words.append([])
         print 'Classifying document %d' % doc_id
 
@@ -120,13 +124,9 @@ test_labels = test_label_file.readlines()
 test_labels = [None] + [int(i.strip()) for i in test_labels]
 test_label_file.close()
 
-for i in range(5):
-    print doc_bern_probs[i]
-exit()
-
 # Predict labels and generate confusion matrix for both models.
-conf_bern = [[0] * len(class_names) for i in range(len(class_names))]
-conf_mult = [[0] * len(class_names) for i in range(len(class_names))]
+conf_bern = [[0 for i in range(len(class_names))] for j in range(len(class_names))]
+conf_mult = [[0 for i in range(len(class_names))] for j in range(len(class_names))]
 for i in range(1,len(doc_bern_probs)):
     true_label = test_labels[i]
     pred_label_bern = sorted(zip(doc_bern_probs[i][1:],range(1,len(class_names))), key = lambda x:-x[0])[0][1]
@@ -134,10 +134,24 @@ for i in range(1,len(doc_bern_probs)):
     conf_bern[true_label][pred_label_bern] += 1
     conf_mult[true_label][pred_label_mult] += 1
 
-for i in conf_bern:
-    print i
-
+# Print the confusion matrices and accurary rates for each model. Rows of the
+#  confusion matrix are the true labels. The columns are the predicted labels.
+print '\nBernoulli confusion matrix:'
+for i in conf_bern[1:len(conf_bern)]:
+    print i[1:len(conf_bern[0])]
 print
+print 'Bernoulli accuracies:'
+accuracies = [float(conf_bern[i][i])/sum(conf_bern[i]) for i in range(1,21)]
+for accuracy in accuracies:
+    print '%.3f' % accuracy,
+print '\nAverage accuracy %.3f\n\n' % (sum(accuracies) / len(accuracies))
 
-for i in conf_mult:
-    print i
+print 'Multinomial confusion matrix:'
+for i in conf_mult[1:len(conf_mult)]:
+    print i[1:len(conf_bern[0])]
+print
+print 'Multinomial accuracies:'
+accuracies = [float(conf_mult[i][i])/sum(conf_mult[i]) for i in range(1,21)]
+for accuracy in accuracies:
+    print '%.3f' % accuracy,
+print '\nAverage accuracy %.3f' % (sum(accuracies) / len(accuracies))
