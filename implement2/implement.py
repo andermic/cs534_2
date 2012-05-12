@@ -4,6 +4,7 @@ from math import log, floor
 
 HEURISTIC_1 = False
 HEURISTIC_2 = False
+HEURISTIC_3 = False
 
 # 'train' will classify the training data, 'test' will classify the testing data
 TEST_PREFIX = 'test'
@@ -34,12 +35,39 @@ tr_data = [[int(j) for j in i.strip().split(' ')] for i in tr_data]
 tr_data_file.close()
 print 'Done.\n'
 
-# If using heuristic 1, remove words from the vocabulary that occur in the training 
-#  data less than K times. 
+# For this heuristic, remove words from the vocabulary that occur in the
+#  training data less than K times.
 if HEURISTIC_1:
     K = 5
-    
+    counts = [None] + [0 for i in range(len(words))]
+    for element in tr_data:
+	doc_id, word_id, count = element
+        counts[word_id] += count
 
+    words = [None] + [i for i in range(1,len(counts)) if counts[i] >= K]
+
+# For this heuristic, throw out a list of commonly occurring words that are
+#  likely nuisance parameters.
+if HEURISTIC_2:
+    # Get stoplist
+    stoplist_file = open('stoplist.txt','r')
+    stoplist = stoplist_file.readlines()
+    stoplist = [None] + [i.strip() for i in stoplist]
+    stoplist_file.close()
+
+    words = [None] + [i for i in words[1:len(words)] if not i in stoplist]
+    
+# For this heuristic, keep only the K words with the most mutual information.
+K = 1000 
+if HEURISTIC_3:
+    pass    
+
+
+# TODO
+"""
+if len(words) != 61189:
+    pass
+"""
 
 # Process training data.
 # Bernoulli model: Count the number of documents each word is present in for
