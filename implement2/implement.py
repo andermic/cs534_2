@@ -2,6 +2,9 @@
 
 from math import log, floor
 
+HEURISTIC_1 = False
+HEURISTIC_2 = False
+
 # 'train' will classify the training data, 'test' will classify the testing data
 TEST_PREFIX = 'test'
 
@@ -23,15 +26,26 @@ tr_labels = tr_label_file.readlines()
 tr_labels = [None] + [int(i.strip()) for i in tr_labels]
 tr_label_file.close()
 
+# Get training data
+print '\nReading training data'
+tr_data_file = open('train.data','r')
+tr_data = tr_data_file.readlines()
+tr_data = [[int(j) for j in i.strip().split(' ')] for i in tr_data]
+tr_data_file.close()
+print 'Done.\n'
+
+# If using heuristic 1, remove words from the vocabulary that occur in the training 
+#  data less than K times. 
+if HEURISTIC_1:
+    K = 5
+    
 
 
-# Get and process training data.
+# Process training data.
 # Bernoulli model: Count the number of documents each word is present in for
 #  each class. Count the number of documents per class.
 # Multinomial model: Count the number of times each word appears in documents
 #  from each class. Count the total number of words in each class.
-train_file = open('train.data','r')
-
 word_presences = [[0 for i in range(len(words))] for j in range(len(class_names))]
 docs_per_class = [0 for i in range(len(class_names))]
 word_nums = [[0 for i in range(len(words))] for j in range(len(class_names))]
@@ -41,16 +55,12 @@ progress = 0
 last_doc_id = -1
 print '\nProcessing training data'
 
-while True:
+for line in tr_data:
     if progress % 100000 == 0:
         print '%d/1467346 training data elements processed' % progress
     progress += 1
 
-    # Get a line from the training data file. Break if eof, else parse line.
-    line = train_file.readline()
-    if line == '':
-        break
-    doc_id, word_id, count = [int(i) for i in line.strip().split(' ')]
+    doc_id, word_id, count = line
     label_id = tr_labels[doc_id]
 
     # Update counts
@@ -62,7 +72,6 @@ while True:
     words_per_class[label_id] += count
 
 print 'Done.\n'
-train_file.close()
 
 
 
@@ -114,7 +123,7 @@ while True:
     #  probabilities for numerical stability.
     for label_id in range(1, len(class_names)):
         doc_bern_probs[-1][label_id] += log(bern_probs[label_id][word_id])
-        doc_mult_probs[-1][label_id] += log(bern_probs[label_id][word_id]) * count
+        doc_mult_probs[-1][label_id] += log(mult_probs[label_id][word_id]) * count
         #doc_words[-1].append(word_id)
 print 'Done.\n'
 
@@ -140,18 +149,22 @@ print '\nBernoulli confusion matrix:'
 for i in conf_bern[1:len(conf_bern)]:
     print i[1:len(conf_bern[0])]
 print
-print 'Bernoulli accuracies:'
+print 'Bernoulli accuracy rates by class:'
 accuracies = [float(conf_bern[i][i])/sum(conf_bern[i]) for i in range(1,21)]
 for accuracy in accuracies:
     print '%.3f' % accuracy,
-print '\nAverage accuracy %.3f\n\n' % (sum(accuracies) / len(accuracies))
+rate = float(sum([conf_bern[i][i] for i in range(1,21)])) / sum([sum(i) for i \
+ in conf_bern])
+print '\nTotal accuracy rate: %.3f\n\n' % rate
 
 print 'Multinomial confusion matrix:'
 for i in conf_mult[1:len(conf_mult)]:
     print i[1:len(conf_bern[0])]
 print
-print 'Multinomial accuracies:'
+print 'Multinomial accuracy rates by class:'
 accuracies = [float(conf_mult[i][i])/sum(conf_mult[i]) for i in range(1,21)]
 for accuracy in accuracies:
     print '%.3f' % accuracy,
-print '\nAverage accuracy %.3f' % (sum(accuracies) / len(accuracies))
+rate = float(sum([conf_mult[i][i] for i in range(1,21)])) / sum([sum(i) for i \
+ in conf_mult])
+print '\nTotal accuracy rate: %.3f' % (sum(accuracies) / len(accuracies))
