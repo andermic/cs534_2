@@ -3,11 +3,28 @@
 from math import log, floor
 from sys import argv
 
-HEURISTIC_1 = False
-HEURISTIC_2 = False 
+# Initialize default values for parameters
+h1 = False
+h2 = False
+test_prefix = 'test'
 
-# 'train' will classify the training data, 'test' will classify the testing data
-TEST_PREFIX = 'test'
+# Set parameters based on command line arguments given by user
+model = argv[1]
+print 'Model: %s' % {'b':'Bernoulli', 'm':'Multinomial'}[model]
+flags = argv[2:]
+for flag in flags:
+    if len(flag.split('=')) == 2 and flag.split('=')[0] == '-h1':
+        h1 = True
+        k = int(flag.split('=')[1])
+        print 'Using heuristic 1, k = %d' % k
+if '-h2' in flags:
+    h2 = True
+    print 'Using heuristic 2'
+if '-train' in flags:
+    test_prefix = 'train'
+print 'Classifying %sing data' % test_prefix
+
+
 
 # Get words
 word_file = open('vocabulary.txt','r')
@@ -35,20 +52,21 @@ tr_data = [[int(j) for j in i.strip().split(' ')] for i in tr_data]
 tr_data_file.close()
 print 'Done.\n'
 
+
+
 # For this heuristic, remove words from the vocabulary that occur in the
-#  training data less than K times.
-if HEURISTIC_1:
-    K = 5
+#  training data less than k times.
+if h1:
     counts = [0 for i in range(len(words))]
     for element in tr_data:
 	doc_id, word_id, count = element
         counts[word_id] += count
 
-    words = [(i if counts[i] >= K else None) for i in range(len(counts))]
+    words = [(i if counts[i] >= k else None) for i in range(len(counts))]
 
 # For this heuristic, throw out a list of commonly occurring words that are
 #  likely nuisance parameters.
-if HEURISTIC_2:
+if h2:
     # Get stoplist
     stoplist_file = open('stoplist.txt','r')
     stoplist = stoplist_file.readlines()
@@ -57,15 +75,21 @@ if HEURISTIC_2:
 
     words = [(None if i in stoplist else i) for i in words]
 
+
+
 # Process training data.
 # Bernoulli model: Count the number of documents each word is present in for
 #  each class. Count the number of documents per class.
 # Multinomial model: Count the number of times each word appears in documents
 #  from each class. Count the total number of words in each class.
-word_presences = [[0 for i in range(len(words))] for j in range(len(class_names))]
-docs_per_class = [0 for i in range(len(class_names))]
-word_nums = [[0 for i in range(len(words))] for j in range(len(class_names))]
-words_per_class = [0 for i in range(len(class_names))]
+if model == 'b':
+    word_presences = [[0 for i in range(len(words))] for j in \
+     range(len(class_names))]
+    docs_per_class = [0 for i in range(len(class_names))]
+elif model == 'm':
+    word_nums = [[0 for i in range(len(words))] for j in \
+     range(len(class_names))]
+    words_per_class = [0 for i in range(len(class_names))]
 
 progress = 0
 last_doc_id = -1
@@ -81,49 +105,51 @@ for line in tr_data:
 
     # Update counts
     if words[word_id] != None:
-        word_presences[label_id][word_id] += 1
-        if last_doc_id != doc_id:
-            docs_per_class[label_id] += 1
     	last_doc_id = doc_id
-        word_nums[label_id][word_id] += count
-        words_per_class[label_id] += count
+        if model == 'b':
+            word_presences[label_id][word_id] += 1
+            if last_doc_id != doc_id:
+                docs_per_class[label_id] += 1
+        if model == 'm':
+            word_nums[label_id][word_id] += count
+            words_per_class[label_id] += count
 
 print 'Done.\n'
 
 
-if HEURISTIC_1 or HEURISTIC_2:
-    print 'Number of words left in vocabulary after applying heuristics:',
-    print str(len([i for i in words if i != None]))
 
-# Estimate p(word|class) for both the Bernouilli and Multinomial models.
-bern_probs = [[0 for i in range(len(words))] for j in range(len(class_names))]
-mult_probs = [[0 for i in range(len(words))] for j in range(len(class_names))]
+# Estimate p(word|class).
+probs = [[0 for i in range(len(words))] for j in range(len(class_names))]
 
 print 'Estimating p(word|class) probabilities'
 for label_id in range(1, len(class_names)):
-    docs = docs_per_class[label_id]
-    total_words = words_per_class[label_id]
+    if model == 'b':
+        docs = docs_per_class[label_id]
+    elif model == 'm':
+        total_words = words_per_class[label_id]
 
     for word_id in range(1, len(words)):
         if words[word_id] != None:
-            word_pres = word_presences[label_id][word_id]
-            word_num = word_nums[label_id][word_id]
+            if model == 'b':
+                word_pres = word_presences[label_id][word_id]
+            elif model == 'm':
+                word_num = word_nums[label_id][word_id]
 
             # Don't forget Laplace smoothing.        
-            bern_probs[label_id][word_id] = float(word_pres + 1) / \
-             float(docs + 2)
-            mult_probs[label_id][word_id] = float(word_num + 1) / \
-             float(total_words + (len(words)-1))
+            if model == 'b':
+                probs[label_id][word_id] = float(word_pres + 1) / \
+                 float(docs + 2)
+            elif model == 'm':
+                probs[label_id][word_id] = float(word_num + 1) / \
+                 float(total_words + (len(words)-1))
 print 'Done.\n'
 
 
 
-# Calculate the probabilities that each test document belongs to each class,
-#  for each model.
-test_file = open(TEST_PREFIX + '.data','r')
-doc_bern_probs = [None]
-doc_mult_probs = [None]
-#doc_words = [None]
+# Calculate the probabilities that each test document belongs to each class.
+test_file = open(test_prefix + '.data','r')
+doc_probs = [None]
+doc_words = [None]
 
 last_doc_id = 0
 while True:
@@ -138,60 +164,59 @@ while True:
         #  probability lists and a word list for the new document.
         if doc_id != last_doc_id:
             last_doc_id = doc_id
-            doc_bern_probs.append([0 for i in range(len(class_names))])
-            doc_mult_probs.append([0 for i in range(len(class_names))])
-            #doc_words.append([])
+            doc_probs.append([0 for i in range(len(class_names))])
+            doc_words.append([])
             print 'Classifying document %d' % doc_id
 
         # Add to a running total for the current doc the probability of the
         #  given word occurring the given number of times, for each class. Use
         #  log probabilities for numerical stability.
         for label_id in range(1, len(class_names)):
-            doc_bern_probs[-1][label_id] += log(bern_probs[label_id][word_id])
-            doc_mult_probs[-1][label_id] += log(mult_probs[label_id][word_id])\
-             * count
-            #doc_words[-1].append(word_id)
+            if model == 'b':
+                doc_probs[-1][label_id] += log(probs[label_id][word_id])
+            elif model == 'm':
+                doc_probs[-1][label_id] += log(probs[label_id][word_id]) * \
+                 count
+            doc_words[-1].append(word_id)
 print 'Done.\n'
 
+
+
 # Get true test labels
-test_label_file = open(TEST_PREFIX + '.label','r')
+test_label_file = open(test_prefix + '.label','r')
 test_labels = test_label_file.readlines()
 test_labels = [None] + [int(i.strip()) for i in test_labels]
 test_label_file.close()
 
-# Predict labels and generate confusion matrix for both models.
-conf_bern = [[0 for i in range(len(class_names))] for j in range(len(class_names))]
-conf_mult = [[0 for i in range(len(class_names))] for j in range(len(class_names))]
-for i in range(1,len(doc_bern_probs)):
+# Predict labels and generate confusion matrix.
+conf = [[0 for i in range(len(class_names))] for j in range(len(class_names))]
+for i in range(1,len(doc_probs)):
     true_label = test_labels[i]
-    pred_label_bern = sorted(zip(doc_bern_probs[i][1:],range(1,len(class_names))), key = lambda x:-x[0])[0][1]
-    pred_label_mult = sorted(zip(doc_mult_probs[i][1:],range(1,len(class_names))), key = lambda x:-x[0])[0][1]
-    conf_bern[true_label][pred_label_bern] += 1
-    conf_mult[true_label][pred_label_mult] += 1
+    pred_label = sorted(zip(doc_probs[i][1:],range(1,len(class_names))), \
+     key = lambda x:-x[0])[0][1]
+    conf[true_label][pred_label] += 1
 
+# Write out confusion matrix to file.
+conf_file = open('confusion.csv','w')
+for row in conf[1:]:
+    conf_file.write('%s\n' % ','.join([str(i) for i in row[1:]]))
+conf_file.close()
 
-# Print the confusion matrices and accurary rates for each model. Rows of the
-#  confusion matrix are the true labels. The columns are the predicted labels.
-print '\nBernoulli confusion matrix:'
-for i in conf_bern[1:len(conf_bern)]:
-    print i[1:len(conf_bern[0])]
+# Print the confusion matrices and accurary rates. Rows of the confusion matrix 
+#  are the true labels. The columns are the predicted labels.
+print '%s confusion matrix:' % {'b':'Bernoulli','m':'Multinomial'}[model]
+for row in conf[1:]:
+    print row[1:]
 print
-print 'Bernoulli accuracy rates by class:'
-accuracies = [float(conf_bern[i][i])/sum(conf_bern[i]) for i in range(1,21)]
+print '%s accuracy rates by class:' % {'b':'Bernoulli','m':'Multinomial'}[model]
+accuracies = [float(conf[i][i])/sum(conf[i]) for i in range(1,21)]
 for accuracy in accuracies:
     print '%.3f' % accuracy,
-rate = float(sum([conf_bern[i][i] for i in range(1,21)])) / sum([sum(i) for i \
- in conf_bern])
-print '\nTotal accuracy rate: %.3f\n\n' % rate
+print '\n'
+rate = float(sum([conf[i][i] for i in range(1,21)])) / sum([sum(i) for i \
+ in conf])
+print 'Total accuracy rate: %.3f\n' % rate
 
-print 'Multinomial confusion matrix:'
-for i in conf_mult[1:len(conf_mult)]:
-    print i[1:len(conf_bern[0])]
-print
-print 'Multinomial accuracy rates by class:'
-accuracies = [float(conf_mult[i][i])/sum(conf_mult[i]) for i in range(1,21)]
-for accuracy in accuracies:
-    print '%.3f' % accuracy,
-rate = float(sum([conf_mult[i][i] for i in range(1,21)])) / sum([sum(i) for i \
- in conf_mult])
-print '\nTotal accuracy rate: %.3f' % (sum(accuracies) / len(accuracies))
+if h1 or h2:
+    print 'Number of words left in vocabulary after applying heuristics:',
+    print str(len([i for i in words if i != None]))
