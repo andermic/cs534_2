@@ -97,22 +97,33 @@ doc_bern_probs = [None]
 doc_mult_probs = [None]
 doc_words = [None]
 countdown = 1
+last_doc_id = 0
 while True:
     # Get a line from the test data file. Break if eof, else parse line.
     line = test_file.readline()
     if line == '':
         break
     doc_id, word_id, count = [int(i) for i in line.strip().split(' ')]
+
+    if doc_id < 708:
+        continue
+
     # If the read line is the start of a new document, initialize probability
     #  lists and a word list for the new document.
-    if doc_id == len(doc_bern_probs):
+    if doc_id != last_doc_id:
+        last_doc_id = doc_id
         doc_bern_probs.append([0 for i in range(len(class_names))])
         doc_mult_probs.append([0 for i in range(len(class_names))])
         doc_words.append([])
         print 'Classifying document %d' % doc_id
         countdown += 1
-        if countdown > 318:
+        if countdown > 100:
             break
+
+        if doc_id != 708:
+         for label_id in range(1, len(class_names)):
+            for word_id in set(range(1,len(words))) - set(doc_words[doc_id-708]):
+                doc_bern_probs[-2][label_id] += log(one_minus_bern_probs[label_id][word_id])
 
     # Add to a running total for the current doc the probability of the given
     #  word occurring the given number of times, for each class. Use log
@@ -122,7 +133,6 @@ while True:
         doc_mult_probs[-1][label_id] += log(mult_probs[label_id][word_id]) * count
         doc_words[-1].append(word_id)
 
-    for wor
 print 'Done.\n'
 
 """
