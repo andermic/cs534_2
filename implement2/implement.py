@@ -82,14 +82,12 @@ if h2:
 #  each class. Count the number of documents per class.
 # Multinomial model: Count the number of times each word appears in documents
 #  from each class. Count the total number of words in each class.
-if model == 'b':
-    word_presences = [[0 for i in range(len(words))] for j in \
-     range(len(class_names))]
-    docs_per_class = [0 for i in range(len(class_names))]
-elif model == 'm':
-    word_nums = [[0 for i in range(len(words))] for j in \
-     range(len(class_names))]
-    words_per_class = [0 for i in range(len(class_names))]
+word_presences = [[0 for i in range(len(words))] for j in \
+ range(len(class_names))]
+docs_per_class = [0 for i in range(len(class_names))]
+word_nums = [[0 for i in range(len(words))] for j in \
+ range(len(class_names))]
+words_per_class = [0 for i in range(len(class_names))]
 
 progress = 0
 last_doc_id = -1
@@ -105,11 +103,11 @@ for line in tr_data:
 
     # Update counts
     if words[word_id] != None:
-    	last_doc_id = doc_id
+        if last_doc_id != doc_id:
+            last_doc_id = doc_id
+            docs_per_class[label_id] += 1
         if model == 'b':
             word_presences[label_id][word_id] += 1
-            if last_doc_id != doc_id:
-                docs_per_class[label_id] += 1
         if model == 'm':
             word_nums[label_id][word_id] += count
             words_per_class[label_id] += count
@@ -144,14 +142,12 @@ for label_id in range(1, len(class_names)):
                  float(total_words + (len(words)-1))
 print 'Done.\n'
 
-
-
 # Calculate the probabilities that each test document belongs to each class.
 test_file = open(test_prefix + '.data','r')
 doc_probs = [None]
 doc_words = [None]
 
-last_doc_id = 0
+last_doc_id = -1
 while True:
     # Get a line from the test data file. Break if eof, else parse line.
     line = test_file.readline()
@@ -177,8 +173,19 @@ while True:
             elif model == 'm':
                 doc_probs[-1][label_id] += log(probs[label_id][word_id]) * \
                  count
-            doc_words[-1].append(word_id)
+        doc_words[-1].append(word_id)
 print 'Done.\n'
+
+# For the Bernoulli model, include the probabilities for each word that did not
+#  occur in each document, for each class.
+if model == 'b':
+    one_minus_probs = [[1-i for i in j] for j in probs]
+    for label_id in range(1, len(class_names)):
+        for doc in range(1, len(doc_words)):
+            probs_not = set(range(1, len(words))) - set(doc_words[doc])
+            for word in probs_not:
+                doc_probs[doc][label_id] += \
+                 log(one_minus_probs[label_id][word])
 
 
 
