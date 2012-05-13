@@ -91,36 +91,6 @@ for line in tr_data:
 print 'Done.\n'
 
 
-"""
-# For this heuristic, keep only the K words with the most mutual information.
-if HEURISTIC_3:
-    K = 6  # Keep only words with mutual information > 10^(-k)
-    mutual = [0] * len(words)
-    total_word_presences = [sum([(word_presences[i][j] if words[j] != None else 0) for i in range(len(class_names))]) for j in range(len(words))]
-    total_docs = sum(docs_per_class)
-    total_word_nums = [sum([(word_nums[i][j] if words[j] != None else 0) for i in range(len(class_names))]) for j in range(len(words))]
-    total_words = sum(words_per_class)
-    info = [0 for i in range(len(words))]
-
-    # Estimate P(X = x), P(Y = y), and P(X = x, Y = x) and use mutual
-    # information formula.
-    for label_id in range(1,len(class_names)):
-        py = float(docs_per_class[label_id]) / sum(docs_per_class)
-        for word_id in range(len(words)):
-            # TODO: Need bernoullis
-            px = float(total_word_nums[word_id]) / total_words
-            pxy = px * word_nums[label_id][word_id] / words_per_class[label_id]
-            try:
-                info[word_id] += pxy * log( pxy /(px * py) )
-            except:
-                info[word_id] = 0
-
-    
-    # Sort probabilities in descending order by frequency
-    print sorted(info, reverse = True)[:100]
-    exit()
-"""
-
 if HEURISTIC_1 or HEURISTIC_2:
     print 'Number of words left in vocabulary after applying heuristics:',
     print str(len([i for i in words if i != None]))
